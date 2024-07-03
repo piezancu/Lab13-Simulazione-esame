@@ -99,3 +99,35 @@ class DAO():
         and s2.state = n.state2 and s1.state = n.state1
         and s1.shape = s2.shape and s2.shape = %s
     group by n.state1, n.state2 """
+
+# ESAME 23/07/2018, nodi sono allStates, archi sono i vicini, il cui peso è il numero di avvistamenti 
+# che distano massimo nGiorni in quell'anno nei 2 stati
+@staticmethod
+    def getEdges1(year, max_diff_g):
+        connessione = DBConnect.get_connection()
+        cursor = connessione.cursor()
+
+        result = []
+
+        query = """select s.state, s2.state, count(*)
+                    from sighting s, sighting s2, neighbor n 
+                    where year(s.`datetime`) = %s
+                        and year(s2.`datetime`) = %s 
+                        and s.state != s2.state 
+                        and s.state = n.state1 
+                        and s2.state = n.state2
+                        and s.state < s2.state 
+                        and datediff(s.`datetime`, s2.`datetime`) <= %s
+                    group by s.state, s2.state """
+
+        print("Creazione archi")
+        cursor.execute(query, (year, year, max_diff_g,))
+        print("Archi creati")
+
+        for row in cursor:
+            result.append((row[0], row[1], row[2]))
+
+        cursor.close()
+        connessione.close()
+
+        return result
