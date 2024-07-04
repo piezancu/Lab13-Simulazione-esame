@@ -90,15 +90,16 @@ class DAO():
 
         return result
 
-# query SBAGLIATA perche conta il numero di COPPIE di osservazioni che avvengono nello stesso anno
-# negli stati 1 e 2
-""" select n.state1 as st1, n.state2 as st2, count(*) as peso
-    from neighbor n, sighting s1, sighting s2
-    where year(s2.datetime) = year(s1.datetime) 
-        and year(s2.datetime) = %s
-        and s2.state = n.state2 and s1.state = n.state1
-        and s1.shape = s2.shape and s2.shape = %s
-    group by n.state1, n.state2 """
+# LEFT JOIN
+"""select n.state1, n.state2, count(*) as peso  
+    from neighbor n 
+        left join sighting s1 
+            on year(s1.datetime) = 2010 and s1.state = n.state1
+        left join sighting s2 
+            on year(s2.datetime) = 2010 and s2.state = n.state2
+            and ABS(datediff(s1.datetime, s2.datetime)) <= 1 
+    where n.state1 < n.state2 
+    group by n.state1, n.state2"""
 
 # ESAME 23/07/2018, nodi sono allStates, archi sono i vicini, il cui peso è il numero di avvistamenti 
 # che distano massimo nGiorni in quell'anno nei 2 stati
